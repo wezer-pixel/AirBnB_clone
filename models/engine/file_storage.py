@@ -22,9 +22,9 @@ class FileStorage:
 
     def save(self):
         """Serialize __Object to JSON file"""
-        with open(FileStorage.__file_path, "w", encoding="utf-8") as f:
+        with open(FileStorage.__file_path, "w", encoding="utf-8") as file:
             d = {k: v.todict() for k, v in FileStorage.__object.items()}
-            json.dump(d, f)
+            json.dump(d, file)
 
     def classes(self):
         """Return a dict of valid classes and their references"""
@@ -49,8 +49,8 @@ class FileStorage:
         """Deserealization JSON to __object"""
         if not os.path.isfile(FileStorage.__file_path):
             return
-        with open(FileStorage.__file_path, "r", encoding="utf-8") as f:
-            obj_dict = json.load(f)
+        with open(FileStorage.__file_path, "r", encoding="utf-8") as file:
+            obj_dict = json.load(file)
             obj_dict = {k: self.classes()[v["__class__"]](**v)
                         for k, v in obj_dict.items()}
             FileStorage.__object = obj_dict
