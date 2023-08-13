@@ -1,96 +1,66 @@
 #!/usr/bin/python3
-"""FileStorage class module"""
-import datetime
+
+""" Serializes instances to JSON file and
+    deseriallizes JSON file to instance
+"""
 import json
-import os
+from models.base_model import BaseModel
+from models.user import User
+from models.state import State
+from models.city import City
+from models.place import Place
+from models.amenity import Amenity
+from models.review import Review
 
-class FileStorage:
 
+class FileStorage():
     """
-    Class for json serialization and deserealization of base classes
+        serialize instance to JSON
+        deserialize JSON to instance
+        private class attributes:
+            __file_path: string - path to JSON (ex: file.json)
+            __objects: dictionary - empty but will store all objects by
+            <class name>.id (ex: store a BaseModel object with id=121212, the
+            key will be BaseModel.121212)
+
+        public instance methods:
+            all(self): returns the dictionary __objects
+            new(self, obj): sets in __objects the obj
+            save(self):serializes __objects to the JSON file(path:__file_path)
+            reload(self):deserializes the JSON file to __objects
+            (only if the JSON file (__path__path_) exists; otherwise,
+            do nothing. if the file doesnt't exist,
+            no exception should be raised)
     """
+
     __file_path = "file.json"
-    __object = {}
+    __objects = dict()
 
     def all(self):
-        """Return __object dict"""
-        return FileStorage.__object
-    
+        """ returns the dictionary __objects """
+        return FileStorage.__objects
+
     def new(self, obj):
-        """Return new object in __object dict"""
-        key = "{}.{}".format(type(obj).__name__, obj.id)
+        """ sets in __objects the object with key <obj cls name>.id"""
+        class_name = type(obj).__name__
+        FileStorage.__objects["{}.{}".format(class_name, obj.id)] = obj
 
     def save(self):
-        """Serialize __Object to JSON file"""
-        with open(FileStorage.__file_path, "w", encoding="utf-8") as file:
-            d = {k: v.todict() for k, v in FileStorage.__object.items()}
-            json.dump(d, file)
+        """ serializes __objects to the JSON file(path:__file_path)"""
+        ob_diction = FileStorage.__objects
+        obj_diction = {obj: ob_diction[obj].to_dict() for obj
+                       in ob_diction.keys()}
+        with open(FileStorage.__file_path, 'w') as f:
+            json.dump(obj_diction, f)
 
-    def classes(self):
-        """Return a dict of valid classes and their references"""
-
-        from base_model import BaseModel
-        from user import User
-        from state import State
-        from city import City
-        from amenity import Amenity
-        from place import Place
-        from review import Review
-
-        classes = {"BaseModel": BaseModel,
-                   "User": User,
-                   "State": State,
-                   "Amenity": Amenity,
-                   "Place": Place,
-                   "Review": Review}
-        return classes
-    
     def reload(self):
-        """Deserealization JSON to __object"""
-        if not os.path.isfile(FileStorage.__file_path):
+        """ deserializes the JSON file to __objects if the JSON file exists"""
+        try:
+            with open(FileStorage.__file_path) as f:
+                obj_diction = json.load(f)
+                for obj in obj_diction.values():
+                    class_name = obj["__class__"]
+                    del obj["__class__"]
+                    self.new(eval(class_name)(**obj))
+        except FileNotFoundError:
             return
-        with open(FileStorage.__file_path, "r", encoding="utf-8") as file:
-            obj_dict = json.load(file)
-            obj_dict = {k: self.classes()[v["__class__"]](**v)
-                        for k, v in obj_dict.items()}
-            FileStorage.__object = obj_dict
-
-
-    def attr(self):
-        """Return attributes anf their type for a class"""
-        attr = {
-            "BaseModel":
-                    {"id": str,
-                     "created_at": datetime.datetime,
-                     "updated_at": datetime.datetime},
-            "User":
-                    {"email": str,
-                     "password": str,
-                     "first_name": str,
-                     "last_name": str},
-            "State":
-                    {"name": str},
-            "City":
-                    {"state_id": str,
-                     "name": str},
-            "Amenity":
-                    {"name": str},
-            "Place":
-                    {"city_id": str,
-                     "user_id": str,
-                     "name": str,
-                     "description": str,
-                     "number_rooms": int,
-                     "number_bathrooms": int,
-                     "max_guest":int,
-                     "price_by_night": int,
-                     "latitude": float,
-                     "longitude": float,
-                     "amenity_ids": list},
-            "Reviews":
-                    {"place_id": str,
-                     "user_id": str,
-                     "text": str}
-        }
-
-        return attr
