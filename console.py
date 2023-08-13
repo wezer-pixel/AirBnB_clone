@@ -5,14 +5,12 @@ import re
 from shlex import split
 from models import storage
 
-
 def parse(arg):
     """Takes a single string arg
     Uses reg expp to search patterns in the input string
     cb searches for the content within curly braces {}
     brc searches for content within brackets []  
-    returns list of processed items         
-    """
+    returns list of processed items"""
     cb = re.search(r"\{(.*?)\}", arg)
     brc = re.search(r"\[(.*?)\]", arg)
     if cb is None:
@@ -28,14 +26,12 @@ def parse(arg):
         retl = [i.strip(",") for i in lexer]
         retl.append(cb.group())
         return retl
-    
-    
+
+
 class HBNBCommand(cmd.Cmd):
     """This is the AirBnB commandline interpreter class
-    
-    Attributes:
-        prompt (str): The command prompt
-    """
+        Attributes:
+        prompt (str): The command prompt"""
 
     prompt = "(hbnb) "
     __classes = {
@@ -55,12 +51,12 @@ class HBNBCommand(cmd.Cmd):
     def default(self, arg):
         """Default behavior for cmd module when input is invalid"""
         argdict = {
-            "all": self.do_all, # type: ignore
+            "all": self.do_all,
             "show": self.do_show,
-            "destroy": self.do_destroy, # type: ignore
-            "count": self.do_count, # type: ignore
-            "update": self.do_update # type: ignore
-        }
+            "destroy": self.do_destroy,
+            "count": self.do_count,
+            "update": self.do_update
+            }
         match = re.search(r"\.", arg)
         if match is not None:
             argl = [arg[:match.span()[0]], arg[match.span()[1]:]]
@@ -72,16 +68,16 @@ class HBNBCommand(cmd.Cmd):
                     return argdict[command[0]](call)
         print("*** Unknown syntax: {}".format(arg))
         return False
-    
+
     def do_quit(self, arg) -> bool:
         """Quit funtion to exit the program"""
         return True
-    
+
     def do_EOF(self, arg) -> bool:
         """EOF characters to exit the program, hold Ctrl+C twice"""
         print("")
         return True
-    
+
     def do_create(self, arg):
         """Usage: create <class>
         Create new class instance and print its id"""
@@ -94,11 +90,9 @@ class HBNBCommand(cmd.Cmd):
             print(eval(arg_list[0])().id)
             storage.save()
 
-    
     def do_show(self, arg):
         """Usage : show <class> <id> or <class>.show(<id>)
-        Display a class instance
-        """
+        Display a class instance"""
 
         arg_list = parse(arg)
         obj_dict = storage.all()
@@ -113,7 +107,6 @@ class HBNBCommand(cmd.Cmd):
         else:
             print(obj_dict["{}.{}".format(arg_list[0], arg_list[1])])
 
-
     def do_destroy(self, arg):
         """Usage: destroy <class> <id> or <class>.destroy(<id>)
         Delete a class instance"""
@@ -127,11 +120,10 @@ class HBNBCommand(cmd.Cmd):
         elif len(arg_list) == 1:
             print("** instance id missing **")
         elif "{}.{}".format(arg_list[0], arg_list[1]) not in obj_dict.keys():
-            print("** no instance found **")  
+            print("** no instance found **")
         else:
-            del obj_dict["{}.{}".format(arg_list[0], arg_list[1])] 
+            del obj_dict["{}.{}".format(arg_list[0], arg_list[1])]
             storage.save()
-
 
     def do_all(self, arg):
         """Usage: all, or all <class> , or <class>.all()
@@ -149,7 +141,6 @@ class HBNBCommand(cmd.Cmd):
                     obj_ls.append(obj.__str__())
             print(obj_ls)
 
-
     def do_count(self, arg):
         """Usage: count <class> , or <class>.count()
         Retrieve the number of instancs of a class"""
@@ -159,7 +150,6 @@ class HBNBCommand(cmd.Cmd):
             if ag_ls[0] == obj.__class__.__name__:
                 i += 1
         print(i)
-
 
     def do_update(self, arg):
         """Usage: update <class> <id> <attr_name> <attr_val>
@@ -192,7 +182,7 @@ class HBNBCommand(cmd.Cmd):
                 type(eval(ag_ls[2])) != dict
             except NameError:
                 return False
-            
+
         if len(ag_ls) == 4:
             obj = objdict["{}.{}".format(ag_ls[0], ag_ls[1])]
             if ag_ls[2] in obj.__class__.__dict__.keys():
@@ -209,9 +199,7 @@ class HBNBCommand(cmd.Cmd):
                     obj.__dict__[key] = val_type(value)
                 else:
                     obj.__dict__[key] = value
-        storage.save()            
-        
-
+        storage.save()
 
 if __name__ == "__main__":
-    HBNBCommand().cmdloop()       
+    HBNBCommand().cmdloop()
