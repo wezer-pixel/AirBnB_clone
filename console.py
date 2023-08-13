@@ -157,6 +157,15 @@ class HBNBCommand(cmd.Cmd):
             print(obj_ls)
 
 
+    def do_count(self, arg):
+        """Usage: count <class> , or <class>.count()
+        Retrieve the number of instancs of a class"""
+        ag_ls = parse(arg)
+        i = 0
+        for obj in storage.all().values():
+            if ag_ls[0] == obj.__class__.__name__:
+                i += 1
+        print(i)
 
 
 if __name__ == "__main__":
