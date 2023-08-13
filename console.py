@@ -4,13 +4,6 @@ import cmd
 import re
 from shlex import split
 from models import storage
-from models.base_model import BaseModel
-from models.user import User
-from models.state import State
-from models.city import City
-from models.place import Place
-from models.amenity import Amenity
-from models.review import Review
 
 
 def parse(arg):
@@ -166,6 +159,58 @@ class HBNBCommand(cmd.Cmd):
             if ag_ls[0] == obj.__class__.__name__:
                 i += 1
         print(i)
+
+
+    def do_update(self, arg):
+        """Usage: update <class> <id> <attr_name> <attr_val>
+        or,
+        <class>.update(<id>, <attr_name>, <attr_val>)
+        or,
+        <class>.update(<id>, <dictionary>)
+        Update a class instance by adding or updating the
+        given attribute, key/val pair or dictionary"""
+        ag_ls = parse(arg)
+        objdict = storage.all()
+
+        if len(ag_ls) == 0:
+            print("** class name missing **")
+            return False
+        if ag_ls[0] not in HBNBCommand.__classes:
+            print("** class doesn't exist **")
+            return False
+        if len(ag_ls) == 1:
+            print("** instance id missing **")
+            return False
+        if "{}.{}".format(ag_ls[0], ag_ls[1]) not in objdict.keys():
+            print("** no instance found **")
+            return False
+        if len(ag_ls) == 2:
+            print("** attribute name missing **")
+            return False
+        if len(ag_ls) ==3:
+            try:
+                type(eval(ag_ls[2])) != dict
+            except NameError:
+                return False
+            
+        if len(ag_ls) == 4:
+            obj = objdict["{}.{}".format(ag_ls[0], ag_ls[1])]
+            if ag_ls[2] in obj.__class__.__dict__.keys():
+                val_type = type(obj.__class__.__dict__[ag_ls[2]])
+                obj.__dict__[ag_ls[2]] = val_type(ag_ls[3])
+            else:
+                obj.__dict__[ag_ls[2]] = ag_ls[3]
+        elif type(eval(ag_ls[2])) == dict:
+            obj = objdict["{}.{}".format(ag_ls[0], ag_ls[1])]
+            for key, value in eval(ag_ls[2]).items:
+                if (key in obj.__class__.__dict__.keys() and
+                        type(obj.__class__.__dict__[key]) in {str, int, float}):
+                    val_type = type(obj.__class__.__dict__[key])
+                    obj.__dict__[key] = val_type(value)
+                else:
+                    obj.__dict__[key] = value
+        storage.save()            
+        
 
 
 if __name__ == "__main__":
