@@ -140,6 +140,22 @@ class HBNBCommand(cmd.Cmd):
             storage.save()
 
 
+    def do_all(self, arg):
+        """Usage: all, or all <class> , or <class>.all()
+        Display string representation of all instances of a class.
+        Displays object instance if no class specified"""
+        ag_ls = parse(arg)
+        if len(ag_ls) > 0 and ag_ls[0] not in HBNBCommand.__classes:
+            print("** class doesn't exist **")
+        else:
+            obj_ls = []
+            for obj in storage.all().values():
+                if len(ag_ls) > 0 and ag_ls[0] == obj.__class__.__name__:
+                    obj_ls.append(obj.__str__())
+                elif len(ag_ls) == 0:
+                    obj_ls.append(obj.__str__())
+            print(obj_ls)
+
 
 
 
