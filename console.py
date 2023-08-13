@@ -5,12 +5,14 @@ import re
 from shlex import split
 from models import storage
 
+
 def parse(arg):
     """Takes a single string arg
     Uses reg expp to search patterns in the input string
     cb searches for the content within curly braces {}
-    brc searches for content within brackets []  
+    brc searches for content within brackets []
     returns list of processed items"""
+
     cb = re.search(r"\{(.*?)\}", arg)
     brc = re.search(r"\[(.*?)\]", arg)
     if cb is None:
@@ -177,7 +179,7 @@ class HBNBCommand(cmd.Cmd):
         if len(ag_ls) == 2:
             print("** attribute name missing **")
             return False
-        if len(ag_ls) ==3:
+        if len(ag_ls) == 3:
             try:
                 type(eval(ag_ls[2])) != dict
             except NameError:
@@ -193,13 +195,13 @@ class HBNBCommand(cmd.Cmd):
         elif type(eval(ag_ls[2])) == dict:
             obj = objdict["{}.{}".format(ag_ls[0], ag_ls[1])]
             for key, value in eval(ag_ls[2]).items:
-                if (key in obj.__class__.__dict__.keys() and
-                        type(obj.__class__.__dict__[key]) in {str, int, float}):
+                if (key in obj.__class__.__dict__.keys() and type(obj.__class__.__dict__[key]) in {str, int, float}):
                     val_type = type(obj.__class__.__dict__[key])
                     obj.__dict__[key] = val_type(value)
                 else:
                     obj.__dict__[key] = value
         storage.save()
+
 
 if __name__ == "__main__":
     HBNBCommand().cmdloop()
